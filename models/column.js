@@ -1,17 +1,21 @@
-const { Schema, model } = require('mongoose');
-const Joi = require('joi');
-const { handleMongooseError, errorMessages } = require('../helpers');
+const { Schema, model } = require("mongoose");
+const Joi = require("joi");
+const { handleMongooseError, errorMessages } = require("../helpers");
 
 const columnSchema = new Schema(
   {
     title: {
       type: String,
-      required: [true, 'Board`s title is required'],
+      required: [true, "Board`s title is required"],
       // unique: true,
     },
     board: {
       type: Schema.Types.ObjectId,
-      ref: 'Board',
+      ref: "Board",
+    },
+    tasksIds: {
+      type: [Schema.Types.ObjectId],
+      ref: "task",
     },
   },
   { versionKey: false, timestamps: false }
@@ -22,7 +26,7 @@ const columnSchemaJoi = Joi.object({
     .min(2)
     .max(100)
     .required()
-    .messages(errorMessages('title')),
+    .messages(errorMessages("title")),
 }).options({ abortEarly: false });
 
 const columnUpdateSchemaJoi = Joi.object({
@@ -30,11 +34,11 @@ const columnUpdateSchemaJoi = Joi.object({
     .min(2)
     .max(100)
     .required()
-    .messages(errorMessages('title')),
+    .messages(errorMessages("title")),
 }).options({ abortEarly: false });
 
-const Column = model('column', columnSchema);
-columnSchema.post('save', handleMongooseError);
+const Column = model("column", columnSchema);
+columnSchema.post("save", handleMongooseError);
 
 module.exports = {
   Column,
