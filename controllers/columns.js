@@ -1,19 +1,26 @@
-const { ctrlWrapper, handleHttpError } = require('../helpers');
-const { Column } = require('../models');
-const { Task } = require('../models');
+const { ctrlWrapper, handleHttpError } = require("../helpers");
+const { Board } = require("../models");
+const { Column } = require("../models");
+const { Task } = require("../models");
 
 const getColumnsByBoardId = async (req, res) => {
   const { boardId } = req.params;
 
-  const userColumns = await Column.find({ board: boardId }) || [];
+  const userColumns = (await Column.find({ board: boardId })) || [];
 
   res.status(201).json(userColumns);
-}
+};
 
 const createColumn = async (req, res) => {
   const { boardId } = req.params;
-  const savedColumn = await Column.create({ ...req.body, board: boardId });
-  res.status(201).json(savedColumn);
+  const result = await Column.create({ ...req.body, board: boardId });
+
+  const { _id: newColumnId } = result;
+  let { columnsIds } = await Board.findById(boardId);
+  columnsIds.push(newColumnId);
+  await Board.findByIdAndUpdate(boardId, { columnsIds });
+
+  res.status(201).json(result);
 };
 
 const updateColumn = async (req, res) => {
@@ -22,7 +29,7 @@ const updateColumn = async (req, res) => {
   const updatedColumn = await Column.findByIdAndUpdate(id, req.body, {
     new: true,
   });
-  if (!updatedColumn) throw handleHttpError(404, 'Column not found');
+  if (!updatedColumn) throw handleHttpError(404, "Column not found");
 
   res.json(updatedColumn);
 };
@@ -31,7 +38,7 @@ const deleteColumn = async (req, res) => {
   const { id } = req.params;
 
   const column = await Column.findById(id);
-  if (!column) throw handleHttpError(404, 'Column not found');
+  if (!column) throw handleHttpError(404, "Column not found");
 
   const tasks = (await Task.find({ column })) || [];
 
@@ -41,7 +48,7 @@ const deleteColumn = async (req, res) => {
 
   const deletedColumn = await Column.findByIdAndDelete(id);
 
-  res.json({ message: 'Column deleted' });
+  res.json({ message: "Column deleted" });
 };
 
 module.exports = {
