@@ -69,7 +69,7 @@ const updateTask = async (req, res) => {
 
 const moveTask = async (req, res) => {
   const { id } = req.params;
-  const { columnStart, columnFinish } = req.body;
+  const { columnStart, columnFinish, indexFinish } = req.body;
   if (!mongooseObjectIdCheck(id)) {
     throw handleHttpError(
       400,
@@ -88,7 +88,7 @@ const moveTask = async (req, res) => {
 
   //add task index to finish column task list
   let { tasksIds: taskIdsFinish } = await Column.findById(columnFinish);
-  const indexToPaste = taskIdsFinish.length;
+  const indexToPaste = indexFinish ? indexFinish : taskIdsFinish.length;
   taskIdsFinish.splice(indexToPaste, 0, id);
   await Column.findByIdAndUpdate(columnFinish, { tasksIds: taskIdsFinish });
 
