@@ -34,6 +34,21 @@ const updateColumn = async (req, res) => {
   res.json(updatedColumn);
 };
 
+const moveColumn = async (req, res) => {
+  const { id } = req.params;
+  const { indexStart, indexFinish } = req.body;
+
+  const updatedColumn = await Column.findById(id);
+  if (!updatedColumn) throw handleHttpError(404, "Column not found");
+  const { board: boardId } = updateColumn;
+  const { columnsIds } = await Board.findById(boardId);
+  columnsIds.splice(indexStart, 1);
+  columnsIds.splice(indexFinish, 0, id);
+  await Board.findByIdAndUpdate(boardId, { columnsIds });
+
+  res.json("move column success");
+};
+
 const deleteColumn = async (req, res) => {
   const { id } = req.params;
 
@@ -46,6 +61,19 @@ const deleteColumn = async (req, res) => {
     await Task.findByIdAndDelete(task._id);
   });
 
+  const { board: boardId } = await Column.findById(id);
+
+  let { columnsIds } = await Board.findById(boardId);
+  const columnIndex = columnsIds.indexOf(id);
+  if (columnIndex === -1) {
+    throw handleHttpError(
+      500,
+      `Bad column index for removing column from columnsIds list`
+    );
+  }
+  columnsIds.splice(columnIndex, 1);
+  await Board.findByIdAndUpdate(boardId, { columnsIds });
+
   const deletedColumn = await Column.findByIdAndDelete(id);
 
   res.json({ message: "Column deleted" });
@@ -54,6 +82,7 @@ const deleteColumn = async (req, res) => {
 module.exports = {
   createColumn: ctrlWrapper(createColumn),
   updateColumn: ctrlWrapper(updateColumn),
+  moveColumn: ctrlWrapper(moveColumn),
   deleteColumn: ctrlWrapper(deleteColumn),
   getColumnsByBoardId: ctrlWrapper(getColumnsByBoardId),
 };

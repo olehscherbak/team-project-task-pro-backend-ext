@@ -9,7 +9,7 @@ const {
   moveTask,
   deleteTask,
   filterTasksByPriority,
-} = require("../controllers/tasks");
+} = require("../controllers");
 
 const {
   taskSchemaJoi,

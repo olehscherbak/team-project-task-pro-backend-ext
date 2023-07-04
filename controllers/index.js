@@ -5,7 +5,7 @@ const {
   update,
   avatarUpdate,
   getCurrentUser,
-} = require('./auth');
+} = require("./auth");
 const {
   createBoard,
   getAllBoards,
@@ -14,25 +14,27 @@ const {
   deleteBoard,
   getCurrentBoard,
   setCurrentBoard,
-} = require('./boards');
+} = require("./boards");
 const {
   createColumn,
   getColumnsByBoardId,
   updateColumn,
+  moveColumn,
   deleteColumn,
-} = require('./columns');
+} = require("./columns");
 const {
   createTask,
   getTasks,
   getTaskById,
   updateTask,
+  moveTask,
   deleteTask,
   filterTasksByPriority,
-} = require('./tasks');
+} = require("./tasks");
 
-const { sendEmail } = require('./sendEmail');
-const { getAllMiniImg, getMiniImgById } = require('./miniImages');
-const { getAllBackground, getBackgroundById } = require('./backgrounds');
+const { sendEmail } = require("./sendEmail");
+const { getAllMiniImg, getMiniImgById } = require("./miniImages");
+const { getAllBackground, getBackgroundById } = require("./backgrounds");
 
 module.exports = {
   register,
@@ -49,11 +51,13 @@ module.exports = {
   createColumn,
   getColumnsByBoardId,
   updateColumn,
+  moveColumn,
   deleteColumn,
   createTask,
   getTasks,
   getTaskById,
   updateTask,
+  moveTask,
   deleteTask,
   sendEmail,
   filterTasksByPriority,

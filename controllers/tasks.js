@@ -103,7 +103,7 @@ const moveTask = async (req, res) => {
   if (!result) {
     throw handleHttpError(404, `Task with id: ${id} is not found`);
   }
-  res.json("success");
+  res.json("task move success");
 };
 
 const deleteTask = async (req, res) => {
@@ -114,10 +114,25 @@ const deleteTask = async (req, res) => {
       `Bad request, id isn't match ObjectId mongoose type`
     );
   }
+
+  const { column: columnId } = await Task.findById(id);
+
+  let { tasksIds } = await Column.findById(columnId);
+  const taskIndex = tasksIds.indexOf(id);
+  if (taskIndex === -1) {
+    throw handleHttpError(
+      500,
+      `Bad task index for removing task from tasksIds list`
+    );
+  }
+  tasksIds.splice(taskIndex, 1);
+  await Column.findByIdAndUpdate(columnId, { tasksIds });
+
   const result = await Task.findByIdAndDelete(id);
   if (!result) {
     throw handleHttpError(404, `Task with id: ${id} is not found`);
   }
+
   res.status(204).send();
 };
 
