@@ -39,11 +39,15 @@ const moveColumn = async (req, res) => {
   const { indexStart, indexFinish } = req.body;
 
   const updatedColumn = await Column.findById(id);
+
   if (!updatedColumn) throw handleHttpError(404, "Column not found");
-  const { board: boardId } = updateColumn;
+  const { board: boardId } = updatedColumn;
+
   const { columnsIds } = await Board.findById(boardId);
+
   columnsIds.splice(indexStart, 1);
   columnsIds.splice(indexFinish, 0, id);
+
   await Board.findByIdAndUpdate(boardId, { columnsIds });
 
   res.json("move column success");
