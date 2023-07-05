@@ -93,16 +93,16 @@ const moveTask = async (req, res) => {
   await Column.findByIdAndUpdate(columnFinish, { tasksIds: taskIdsFinish });
 
   // del?
-  const result = await Task.findByIdAndUpdate(
-    id,
-    { column: columnFinish },
-    {
-      new: true,
-    }
-  );
-  if (!result) {
-    throw handleHttpError(404, `Task with id: ${id} is not found`);
-  }
+  // const result = await Task.findByIdAndUpdate(
+  //   id,
+  //   { column: columnFinish },
+  //   {
+  //     new: true,
+  //   }
+  // );
+  // if (!result) {
+  //   throw handleHttpError(404, `Task with id: ${id} is not found`);
+  // }
   res.json("task move success");
 };
 

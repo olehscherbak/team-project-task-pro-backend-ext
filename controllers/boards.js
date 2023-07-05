@@ -1,16 +1,16 @@
-const { ctrlWrapper, handleHttpError } = require('../helpers');
-const { Board } = require('../models/board');
-const { Task } = require('../models/task');
-const { Column } = require('../models/column');
-const { populate } = require('dotenv');
-const { User } = require('../models/user');
+const { ctrlWrapper, handleHttpError } = require("../helpers");
+const { Board } = require("../models/board");
+const { Task } = require("../models/task");
+const { Column } = require("../models/column");
+const { populate } = require("dotenv");
+const { User } = require("../models/user");
 
 const createBoard = async (req, res) => {
   const { _id: owner } = req.user;
   const { title } = req.body;
 
   const board = await Board.findOne({ owner, title });
-  if (board) throw handleHttpError(400, 'This board title is allready in use');
+  if (board) throw handleHttpError(400, "This board title is allready in use");
 
   const newBoard = await Board.create({ ...req.body, owner });
 
@@ -28,7 +28,7 @@ const updateBoard = async (req, res) => {
     new: true,
   });
 
-  if (!board) throw handleHttpError(404, 'Not found');
+  if (!board) throw handleHttpError(404, "Not found");
 
   res.status(200).json(board);
 };
@@ -37,7 +37,7 @@ const deleteBoard = async (req, res) => {
   const { id } = req.params;
 
   const board = await Board.findById(id);
-  if (!board) throw handleHttpError(404, 'Not found');
+  if (!board) throw handleHttpError(404, "Not found");
 
   const columns = (await Column.find({ board })) || [];
   const tasks = (await Task.find({ board })) || [];
@@ -52,7 +52,7 @@ const deleteBoard = async (req, res) => {
 
   await Board.findByIdAndDelete(id);
 
-  res.json({ message: 'Board deleted' });
+  res.json({ message: "Board deleted" });
 };
 
 const getAllBoards = async (req, res) => {
@@ -65,14 +65,29 @@ const getBoardById = async (req, res) => {
   const { id: board } = req.params;
   const { _id: userId } = req.user;
 
-  const currentBoard = await Board.findById(board, '-createdAt -updatedAt');
+  const currentBoard = await Board.findById(board, "-createdAt -updatedAt");
   if (!currentBoard)
     throw handleHttpError(404, `Board with id ${board} not found`);
 
   await User.findByIdAndUpdate(userId, { currentBoard: board }, { new: true });
 
-  const columns = (await Column.find({ board }, '-createdAt -updatedAt')) || [];
-  const tasks = (await Task.find({ board }, '-createdAt -updatedAt')) || [];
+  const columns = (await Column.find({ board }, "-createdAt -updatedAt")) || [];
+  const tasks = (await Task.find({ board }, "-createdAt -updatedAt")) || [];
+  // let columnsList = [];
+  // let tasksList = [];
+  // currentBoard.columnsIds.map((columnId) => {
+  //   const orderedColumnTemp = columns.filter(
+  //     (column) => column._id === columnId
+  //   );
+  //   orderedColumnTemp.tasksIds.map((taskId) => {
+  //     const orderedTask = tasks.filter((task) => task._id === taskId);
+  //     tasksList.push(orderedTask);
+  //   });
+  //   const orderedColumn = { ...orderedColumnTemp, tasksList };
+  //   tasksList = [];
+  //   columnsList.push(orderedColumn);
+  // });
+  // console.log("columnsList:", columnsList);
 
   res.status(200).json({ ...currentBoard._doc, columns, tasks });
 };
@@ -88,13 +103,13 @@ const getCurrentBoard = async (req, res) => {
   const board = user.currentBoard;
 
   const lastBoard =
-    (await Board.findById(board, '-createdAt -updatedAt')) || [];
+    (await Board.findById(board, "-createdAt -updatedAt")) || [];
   if (lastBoard.length === 0) {
     return res.status(200).json(lastBoard);
   }
 
-  const columns = (await Column.find({ board }, '-createdAt -updatedAt')) || [];
-  const tasks = (await Task.find({ board }, '-createdAt -updatedAt')) || [];
+  const columns = (await Column.find({ board }, "-createdAt -updatedAt")) || [];
+  const tasks = (await Task.find({ board }, "-createdAt -updatedAt")) || [];
 
   res.status(200).json({ ...lastBoard._doc, columns, tasks });
 };
