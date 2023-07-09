@@ -6,7 +6,8 @@ const { Task } = require("../models");
 const getColumnsByBoardId = async (req, res) => {
   const { boardId } = req.params;
 
-  const userColumns = (await Column.find({ board: boardId })) || [];
+  const userColumns =
+    (await Column.find({ board: boardId }, "-createdAt -updatedAt")) || [];
 
   res.status(201).json(userColumns);
 };
@@ -59,7 +60,7 @@ const deleteColumn = async (req, res) => {
   const column = await Column.findById(id);
   if (!column) throw handleHttpError(404, "Column not found");
 
-  const tasks = (await Task.find({ column })) || [];
+  const tasks = (await Task.find({ column }, "-createdAt -updatedAt")) || [];
 
   tasks.forEach(async (task) => {
     await Task.findByIdAndDelete(task._id);

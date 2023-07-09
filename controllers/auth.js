@@ -1,8 +1,8 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const cloudinary = require('cloudinary').v2;
-const { ctrlWrapper, handleHttpError } = require('../helpers');
-const { User, Board } = require('../models');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary").v2;
+const { ctrlWrapper, handleHttpError } = require("../helpers");
+const { User, Board } = require("../models");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -15,7 +15,7 @@ const register = async (req, res) => {
   const userExists = await User.findOne({ email });
 
   if (userExists) {
-    throw handleHttpError(409, 'Email is already in use');
+    throw handleHttpError(409, "Email is already in use");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -23,13 +23,13 @@ const register = async (req, res) => {
   await User.create({
     ...req.body,
     password: hashedPassword,
-    avatarURL: '',
+    avatarURL: "",
   });
 
   const user = await User.findOne({ email });
   const jwtPayload = { id: user._id };
   const token = jwt.sign(jwtPayload, process.env.JWT_SECRET, {
-    expiresIn: '24h',
+    expiresIn: "24h",
   });
   await User.findByIdAndUpdate(user._id, { token });
 
@@ -46,19 +46,19 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
-  if (!user) throw handleHttpError(401, 'Email or password is wrong');
+  if (!user) throw handleHttpError(401, "Email or password is wrong");
 
   const comparePassword = await bcrypt.compare(password, user.password);
   if (!comparePassword)
-    throw handleHttpError(401, 'Email or password is wrong');
+    throw handleHttpError(401, "Email or password is wrong");
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: '24h',
+    expiresIn: "24h",
   });
 
   await User.findByIdAndUpdate(user._id, { token });
 
-  const boards = await Board.find({ owner: user._id });
+  const boards = await Board.find({ owner: user._id }, "-createdAt -updatedAt");
 
   res.json({
     name: user.name,
@@ -73,7 +73,7 @@ const login = async (req, res) => {
 
 const getCurrentUser = async (req, res) => {
   const { _id, name, email, avatarURL, theme, currentBoard } = req.user;
-  const boards = await Board.find({ owner: _id });
+  const boards = await Board.find({ owner: _id }, "-createdAt -updatedAt");
 
   res.json({
     id: _id,
@@ -88,7 +88,7 @@ const getCurrentUser = async (req, res) => {
 
 const logout = async (req, res) => {
   const { _id } = req.user;
-  await User.findByIdAndUpdate(_id, { token: '' });
+  await User.findByIdAndUpdate(_id, { token: "" });
   res.status(204).json({});
 };
 
@@ -108,7 +108,7 @@ const avatarUpdate = async (req, res) => {
   const result = await cloudinary.uploader.upload(path, {
     public_id: `avatars/${newAvatarName}`,
     overwrite: true,
-    transformation: { width: 68, height: 68, crop: 'fill' },
+    transformation: { width: 68, height: 68, crop: "fill" },
   });
 
   await User.findByIdAndUpdate(_id, { avatarURL: result.secure_url });

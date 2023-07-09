@@ -47,7 +47,9 @@ const createTask = async (req, res) => {
   tasksIds.push(newTaskId);
   await Column.findByIdAndUpdate(columnId, { tasksIds });
 
-  res.status(201).json(result);
+  const createdTask = await Task.findById(newTaskId, "-createdAt -updatedAt");
+
+  res.status(201).json(createdTask);
 };
 
 const updateTask = async (req, res) => {
@@ -92,17 +94,8 @@ const moveTask = async (req, res) => {
   taskIdsFinish.splice(indexToPaste, 0, id);
   await Column.findByIdAndUpdate(columnFinish, { tasksIds: taskIdsFinish });
 
-  // del?
-  // const result = await Task.findByIdAndUpdate(
-  //   id,
-  //   { column: columnFinish },
-  //   {
-  //     new: true,
-  //   }
-  // );
-  // if (!result) {
-  //   throw handleHttpError(404, `Task with id: ${id} is not found`);
-  // }
+  await Task.findByIdAndUpdate(id, { column: columnFinish });
+
   res.json("task move success");
 };
 
@@ -144,7 +137,10 @@ const filterTasksByPriority = async (req, res) => {
       `Bad request, columnId isn't match ObjectId mongoose type`
     );
   }
-  const result = await Task.find({ column: columnId, priority });
+  const result = await Task.find(
+    { column: columnId, priority },
+    "-createdAt -updatedAt"
+  );
   res.json(result);
 };
 

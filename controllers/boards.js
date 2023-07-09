@@ -39,8 +39,8 @@ const deleteBoard = async (req, res) => {
   const board = await Board.findById(id);
   if (!board) throw handleHttpError(404, "Not found");
 
-  const columns = (await Column.find({ board })) || [];
-  const tasks = (await Task.find({ board })) || [];
+  const columns = (await Column.find({ board }, "-createdAt -updatedAt")) || [];
+  const tasks = (await Task.find({ board }, "-createdAt -updatedAt")) || [];
 
   columns.forEach(async (column) => {
     await Column.findByIdAndDelete(column._id);
@@ -57,7 +57,7 @@ const deleteBoard = async (req, res) => {
 
 const getAllBoards = async (req, res) => {
   const { _id: owner } = req.user;
-  const boards = (await Board.find({ owner })) || [];
+  const boards = (await Board.find({ owner }, "-createdAt -updatedAt")) || [];
   res.status(200).json(boards);
 };
 
@@ -71,25 +71,45 @@ const getBoardById = async (req, res) => {
 
   await User.findByIdAndUpdate(userId, { currentBoard: board }, { new: true });
 
-  const columns = (await Column.find({ board }, "-createdAt -updatedAt")) || [];
-  const tasks = (await Task.find({ board }, "-createdAt -updatedAt")) || [];
-  // let columnsList = [];
-  // let tasksList = [];
-  // currentBoard.columnsIds.map((columnId) => {
-  //   const orderedColumnTemp = columns.filter(
-  //     (column) => column._id === columnId
-  //   );
-  //   orderedColumnTemp.tasksIds.map((taskId) => {
-  //     const orderedTask = tasks.filter((task) => task._id === taskId);
-  //     tasksList.push(orderedTask);
-  //   });
-  //   const orderedColumn = { ...orderedColumnTemp, tasksList };
-  //   tasksList = [];
-  //   columnsList.push(orderedColumn);
-  // });
-  // console.log("columnsList:", columnsList);
+  const columns =
+    (await Column.find({ board }, "-board -createdAt -updatedAt")) || [];
 
-  res.status(200).json({ ...currentBoard._doc, columns, tasks });
+  const tasks =
+    (await Task.find({ board }, "-board -column -createdAt -updatedAt")) || [];
+
+  let columnsList = [];
+  let tasksList = [];
+
+  currentBoard.columnsIds.map((columnId) => {
+    let orderedColumnTemp = columns.find((column) =>
+      column._id.equals(columnId)
+    );
+    if (orderedColumnTemp) {
+      orderedColumnTemp.tasksIds.map((taskId) => {
+        const orderedTask = tasks.find((task) => task._id.equals(taskId));
+        if (orderedTask) {
+          tasksList.push(orderedTask);
+        }
+      });
+
+      const orderedColumnTempConv = { ...orderedColumnTemp._doc };
+      delete orderedColumnTempConv.tasksIds;
+
+      const orderedColumn = { ...orderedColumnTempConv, tasksList };
+      tasksList = [];
+      columnsList.push(orderedColumn);
+    }
+  });
+  const columnsIdsTitles = columnsList.map(({ _id, title }) => {
+    return { _id, title };
+  });
+  const result = {
+    ...currentBoard._doc,
+    columnsIds: columnsIdsTitles,
+    columns: columnsList,
+  };
+
+  res.status(200).json(result);
 };
 
 const getCurrentBoard = async (req, res) => {

@@ -26,7 +26,7 @@ const boardSchema = new Schema(
       ref: "column",
     },
   },
-  { versionKey: false, timestamps: false }
+  { versionKey: false, timestamps: true }
 );
 
 const Board = model("board", boardSchema);

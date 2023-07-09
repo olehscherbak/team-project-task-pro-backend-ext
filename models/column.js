@@ -18,7 +18,7 @@ const columnSchema = new Schema(
       ref: "task",
     },
   },
-  { versionKey: false, timestamps: false }
+  { versionKey: false, timestamps: true }
 );
 
 const columnSchemaJoi = Joi.object({

@@ -34,7 +34,7 @@ const taskSchema = new Schema(
       required: true,
     },
   },
-  { versionKey: false, timestamps: false }
+  { versionKey: false, timestamps: true }
 );
 
 const Task = model("task", taskSchema);
