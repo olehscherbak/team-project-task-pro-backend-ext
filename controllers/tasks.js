@@ -90,7 +90,9 @@ const moveTask = async (req, res) => {
 
   //add task index to finish column task list
   let { tasksIds: taskIdsFinish } = await Column.findById(columnFinish);
-  const indexToPaste = indexFinish ? indexFinish : taskIdsFinish.length;
+  const indexToPaste =
+    indexFinish || indexFinish === 0 ? indexFinish : taskIdsFinish.length;
+
   taskIdsFinish.splice(indexToPaste, 0, id);
   await Column.findByIdAndUpdate(columnFinish, { tasksIds: taskIdsFinish });
 

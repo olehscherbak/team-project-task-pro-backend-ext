@@ -45,15 +45,16 @@ const taskSchemaJoi = Joi.object({
   description: Joi.string().required(),
   priority: Joi.string().valid("low", "medium", "high", "without").required(),
   deadline: Joi.date().min(moment().startOf("day").toDate()).required(),
-  board: Joi.string(), //passing by res.params, without it route dont work, validateSchema takes only rew.body
-  column: Joi.string(), //passing by res.params, without it route dont work, validateSchema takes only rew.body
+  board: Joi.string(), //passing by res.params, without it route dont work, validateSchema takes only req.body
+  column: Joi.string(), //passing by res.params, without it route dont work, validateSchema takes only req.body
 }).options({ abortEarly: false });
 
 const taskUpdateSchemaJoi = Joi.object({
   title: Joi.string(),
   description: Joi.string(),
   priority: Joi.string().valid("low", "medium", "high", "without"),
-  deadline: Joi.date().min(moment().startOf("day").toDate()),
+  deadline: Joi.date(),
+  // .min(moment().startOf("day").toDate()),
   board: Joi.string(),
   column: Joi.string(),
 }).options({ abortEarly: false });
